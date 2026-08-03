@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Settings · NextGPT</title>
+<meta name="description" content="Manage your NextGPT profile, appearance, language, notifications and security including passkeys." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E" />
+<style>
+:root{
+  --bg:#07080d;--panel:#0b0d15;--surface:rgba(255,255,255,.05);--surface-2:rgba(255,255,255,.085);
+  --border:rgba(255,255,255,.1);--text:#eef1f8;--muted:#98a0b4;--brand:#6d8bff;--accent:#26d0b0;--danger:#ff6b7d;
+  --grad:linear-gradient(120deg,#6d8bff,#8f6dff 55%,#26d0b0);
+  --shadow:0 24px 70px -24px rgba(0,0,0,.8);--shadow-glow:0 14px 40px -12px rgba(109,139,255,.5);
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+html[data-theme="light"]{--bg:#f6f7fb;--panel:#fff;--surface:rgba(12,16,32,.04);--surface-2:rgba(12,16,32,.075);
+  --border:rgba(12,16,32,.11);--text:#101426;--muted:#5b647c;--shadow:0 24px 60px -28px rgba(18,24,45,.3)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;transition:background .4s,color .4s}
+button,input,select,textarea{font-family:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+.wrap{width:min(980px,92vw);margin:0 auto;padding-bottom:70px}
+
+.topbar{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--border);
+  background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(16px)}
+.topbar-in{display:flex;align-items:center;gap:12px;padding:13px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em}
+.mark{width:32px;height:32px;border-radius:11px;background:var(--grad);display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-glow)}
+.nav{margin-left:auto;display:flex;gap:6px;align-items:center}
+.linkbtn{padding:9px 15px;border-radius:11px;border:1px solid var(--border);background:var(--surface);font-size:.88rem;font-weight:620;transition:.2s;cursor:pointer}
+.linkbtn:hover{background:var(--surface-2)}
+.icon-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:15px}
+
+/* hero banner */
+.hero{margin-top:22px;border:1px solid var(--border);border-radius:26px;overflow:hidden;background:var(--panel);box-shadow:var(--shadow)}
+.banner{height:170px;background:var(--grad);position:relative;background-size:cover;background-position:center}
+.banner .edit{position:absolute;right:14px;bottom:14px;border:1px solid rgba(255,255,255,.35);
+  background:rgba(6,8,16,.45);color:#fff;border-radius:11px;padding:8px 14px;font-size:.82rem;cursor:pointer;backdrop-filter:blur(8px)}
+.idrow{display:flex;align-items:flex-end;gap:16px;padding:0 24px 22px;margin-top:-44px;flex-wrap:wrap}
+.pfp{width:96px;height:96px;border-radius:50%;border:4px solid var(--panel);background:var(--grad);display:grid;place-items:center;
+  color:#fff;font-size:2rem;font-weight:700;overflow:hidden;position:relative;flex:none}
+.pfp img{width:100%;height:100%;object-fit:cover}
+.pfp button{position:absolute;inset:auto 0 0 0;height:30px;border:0;background:rgba(6,8,16,.6);color:#fff;font-size:.7rem;cursor:pointer}
+.idtext{flex:1;min-width:200px;padding-bottom:6px}
+.idtext h1{font-size:1.4rem;letter-spacing:-.03em}
+.idtext p{color:var(--muted);font-size:.9rem}
+
+/* sections */
+.section{margin-top:20px;border:1px solid var(--border);border-radius:22px;background:var(--panel);padding:24px;box-shadow:var(--shadow)}
+.section h2{font-size:1.08rem;letter-spacing:-.02em;display:flex;align-items:center;gap:9px}
+.section .sub{color:var(--muted);font-size:.88rem;margin-top:5px;margin-bottom:18px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.f label{display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:700;margin-bottom:8px}
+input[type=text],input[type=email],input[type=password],select{width:100%;padding:12px 14px;border-radius:13px;
+  border:1px solid var(--border);background:var(--bg);outline:0;font-size:.93rem;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(109,139,255,.14)}
+.err{color:var(--danger);font-size:.78rem;min-height:15px;margin-top:5px}
+.row{display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid var(--border)}
+.row:first-of-type{border-top:0}
+.row .info{flex:1;min-width:0}
+.row .info b{display:block;font-size:.94rem;font-weight:640}
+.row .info span{color:var(--muted);font-size:.84rem}
+.switch{position:relative;width:50px;height:28px;border-radius:99px;background:var(--surface-2);border:1px solid var(--border);
+  cursor:pointer;flex:none;transition:.25s}
+.switch i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:.25s}
+.switch.on{background:var(--grad);border-color:transparent}
+.switch.on i{left:25px;background:#fff}
+.themes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.theme-card{border:1px solid var(--border);border-radius:16px;padding:14px;cursor:pointer;transition:.25s;background:var(--surface)}
+.theme-card:hover{transform:translateY(-3px)}
+.theme-card.on{border-color:rgba(109,139,255,.6);box-shadow:var(--shadow-glow)}
+.swatch{height:56px;border-radius:11px;margin-bottom:10px;border:1px solid var(--border)}
+.swatch.dark{background:linear-gradient(135deg,#07080d,#1a2040)}
+.swatch.light{background:linear-gradient(135deg,#f6f7fb,#dfe4f5)}
+.theme-card b{font-size:.9rem}
+.btn{padding:12px 20px;border-radius:13px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-weight:640;font-size:.9rem;transition:.2s}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--grad);border:0;color:#fff;box-shadow:var(--shadow-glow)}
+.btn.primary:hover{transform:translateY(-2px)}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.pill{font-size:.74rem;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted)}
+.pill.ok{color:var(--accent);border-color:rgba(38,208,176,.5)}
+.keys{display:grid;gap:8px;margin-top:12px}
+.key{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:13px;border:1px solid var(--border);background:var(--surface);font-size:.88rem}
+.key .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,24px);opacity:0;padding:12px 20px;border-radius:13px;
+  border:1px solid var(--border);background:var(--panel);box-shadow:var(--shadow);font-size:.9rem;transition:.3s;z-index:99;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.reveal{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}}
+@media(max-width:720px){.fields{grid-template-columns:1fr}.themes{grid-template-columns:1fr}.banner{height:130px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="wrap topbar-in">
+  <a class="brand" href="/"><span class="mark">✦</span> NextGPT</a>
+  <div class="nav">
+    <a class="linkbtn" href="/chat">Chat</a>
+    <a class="linkbtn" href="/workspace">Workspace</a>
+    <button class="icon-btn" id="themeBtn" aria-label="Toggle theme">🌙</button>
+  </div>
+</div></div>
+
+<div class="wrap">
+  <!-- ===== profile hero ===== -->
+  <div class="hero reveal">
+    <div class="banner" id="banner">
+      <button class="edit" id="btnBanner">Change banner</button>
+    </div>
+    <div class="idrow">
+      <div class="pfp" id="pfp"><span id="pfpInitial">G</span><button id="btnPfp">Edit</button></div>
+      <div class="idtext">
+        <h1 id="hName">Guest</h1>
+        <p id="hMail">Not signed in · changes are stored in this browser</p>
+      </div>
+      <button class="btn primary" id="btnSaveTop">Save changes</button>
+    </div>
+  </div>
+  <input type="file" id="fileAvatar" accept="image/*" hidden />
+  <input type="file" id="fileBanner" accept="image/*" hidden />
+
+  <!-- ===== profile ===== -->
+  <section class="section reveal">
+    <h2>👤 Profile</h2>
+    <p class="sub">Your identity across the chat, workspace and settings pages.</p>
+    <div class="fields">
+      <div class="f">
+        <label for="username">Username</label>
+        <input id="username" type="text" placeholder="ada.lovelace" maxlength="24" />
+        <div class="err" id="usernameErr"></div>
+      </div>
+      <div class="f">
+        <label for="displayName">Display name</label>
+        <input id="displayName" type="text" placeholder="Ada Lovelace" maxlength="40" />
+        <div class="err" id="displayNameErr"></div>
+      </div>
+      <div class="f">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@example.com" />
+        <div class="err" id="emailErr"></div>
+      </div>
+      <div class="f">
+        <label for="bio">Short bio</label>
+        <input id="bio" type="text" placeholder="Building things with AI" maxlength="90" />
+        <div class="err"></div>
+      </div>
+    </div>
+    <div class="actions"><button class="btn primary" id="btnSaveProfile">Save profile</button></div>
+  </section>
+
+  <!-- ===== appearance ===== -->
+  <section class="section reveal">
+    <h2>🎨 Appearance</h2>
+    <p class="sub">Theme changes apply instantly and are remembered on every page.</p>
+    <div class="themes">
+      <div class="theme-card" data-theme="dark"><div class="swatch dark"></div><b>Dark mode</b><div class="sub" style="margin:4px 0 0">Default. Easy on the eyes.</div></div>
+      <div class="theme-card" data-theme="light"><div class="swatch light"></div><b>Light mode</b><div class="sub" style="margin:4px 0 0">Bright and high contrast.</div></div>
+    </div>
+    <div class="fields" style="margin-top:16px">
+      <div class="f">
+        <label for="language">Language</label>
+        <select id="language">
+          <option value="en">English</option><option value="fr">Français</option><option value="es">Español</option>
+          <option value="de">Deutsch</option><option value="it">Italiano</option><option value="pt">Português</option>
+          <option value="ar">العربية</option><option value="hi">हिन्दी</option><option value="zh">中文</option>
+          <option value="ja">日本語</option><option value="ru">Русский</option><option value="tr">Türkçe</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== notifications ===== -->
+  <section class="section reveal">
+    <h2>🔔 Notifications</h2>
+    <p class="sub">Choose what NextGPT tells you about.</p>
+    <div class="row"><div class="info"><b>Response ready</b><span>Notify me when a long generation finishes.</span></div><div class="switch" id="swResponse"><i></i></div></div>
+    <div class="row"><div class="info"><b>Sound effects</b><span>Play a soft chime on completed answers.</span></div><div class="switch" id="swSound"><i></i></div></div>
+    <div class="row"><div class="info"><b>Product updates</b><span>Show a banner when new features land.</span></div><div class="switch" id="swUpdates"><i></i></div></div>
+    <div class="actions"><button class="btn" id="btnBrowserPerm">Enable browser notifications</button></div>
+  </section>
+
+  <!-- ===== security ===== -->
+  <section class="section reveal">
+    <h2>🔒 Security <span class="pill" id="webauthnPill">checking…</span></h2>
+    <p class="sub">Change your password, add a passkey and enable biometric unlock on supported devices.</p>
+    <div class="fields">
+      <div class="f">
+        <label for="pass1">New password</label>
+        <input id="pass1" type="password" placeholder="At least 8 characters" />
+        <div class="err" id="pass1Err"></div>
+      </div>
+      <div class="f">
+        <label for="pass2">Confirm password</label>
+        <input id="pass2" type="password" placeholder="Repeat password" />
+        <div class="err" id="pass2Err"></div>
+      </div>
+    </div>
+    <div class="actions"><button class="btn primary" id="btnPassword">Update password</button></div>
+
+    <div class="row" style="margin-top:20px"><div class="info"><b>Biometric unlock</b><span>Require Face ID / fingerprint before opening your chats on this device.</span></div><div class="switch" id="swBio"><i></i></div></div>
+
+    <div style="margin-top:6px">
+      <div class="row"><div class="info"><b>Passkeys</b><span>Sign in without a password using WebAuthn.</span></div>
+        <button class="btn" id="btnPasskey">Add passkey</button></div>
+      <div class="keys" id="keyList"></div>
+    </div>
+  </section>
+
+  <!-- ===== data ===== -->
+  <section class="section reveal">
+    <h2>🗄️ Data &amp; account</h2>
+    <p class="sub">Everything is stored in this browser's localStorage. Nothing leaves your device except AI prompts.</p>
+    <div class="row"><div class="info"><b>Export all data</b><span>Download chats, settings, profile and workspace history.</span></div><button class="btn" id="btnExportAll">Export</button></div>
+    <div class="row"><div class="info"><b>Clear chat history</b><span>Delete every conversation stored on this device.</span></div><button class="btn danger" id="btnClearChats">Clear chats</button></div>
+    <div class="row"><div class="info"><b>Log out</b><span>End the session on this browser.</span></div><button class="btn danger" id="btnLogout">Log out</button></div>
+    <div class="row"><div class="info"><b>Delete account</b><span>Removes your local account and all associated data. This cannot be undone.</span></div><button class="btn danger" id="btnDelete">Delete</button></div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ keys ============ */
+var THEME='nextgpt:theme',PROFILE='nextgpt:profile',SETTINGS='nextgpt:settings',
+    SESSION='nextgpt:session',USERS='nextgpt:users',CHATS='nextgpt:chats',
+    ACTIVE='nextgpt:activeChat',WORKSPACE='nextgpt:workspace',PASSKEYS='nextgpt:passkeys';
+
+document.documentElement.setAttribute('data-theme',localStorage.getItem(THEME)||'dark');
+
+/* ============ helpers ============ */
+function read(key,fallback){ try{ var v=JSON.parse(localStorage.getItem(key)); return v==null?fallback:v; }catch(e){ return fallback; } }
+function write(key,val){ localStorage.setItem(key,JSON.stringify(val)); }
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function clean(v){return String(v==null?'':v).replace(/[<>]/g,'').trim();}
+var toastEl=document.getElementById('toast'),tT;
+function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(tT);tT=setTimeout(function(){toastEl.classList.remove('show');},2800);}
+function setErr(id,msg){var e=document.getElementById(id);if(e)e.textContent=msg||'';return !msg;}
+var emailRe=/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
+function hash(str){
+  var h1=0x811c9dc5,h2=0x1000193;
+  for(var i=0;i<str.length;i++){h1=(h1^str.charCodeAt(i))>>>0;h1=(h1*16777619)>>>0;h2=(h2+str.charCodeAt(i)*(i+7))>>>0;}
+  return (h1.toString(16)+h2.toString(16)).padStart(16,'0');
+}
+
+/* ============ state ============ */
+var profile=read(PROFILE,{}),settings=read(SETTINGS,{}),session=read(SESSION,null);
+settings=Object.assign({language:'en',notifyResponse:true,sound:false,updates:true,biometrics:false},settings);
+
+/* ============ theme ============ */
+var themeBtn=document.getElementById('themeBtn');
+function paintTheme(){
+  var t=document.documentElement.getAttribute('data-theme');
+  themeBtn.textContent=t==='dark'?'🌙':'☀️';
+  document.querySelectorAll('.theme-card').forEach(function(c){c.classList.toggle('on',c.dataset.theme===t);});
+}
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem(THEME,t);paintTheme();}
+themeBtn.onclick=function(){setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');};
+document.querySelectorAll('.theme-card').forEach(function(c){
+  c.onclick=function(){setTheme(c.dataset.theme);toast('Theme updated');};
+});
+
+/* ============ paint profile ============ */
+function paintProfile(){
+  var name=profile.displayName||(session&&session.displayName)||'Guest';
+  document.getElementById('hName').textContent=name;
+  document.getElementById('hMail').textContent=(session&&session.email)||'Not signed in · changes are stored in this browser';
+  document.getElementById('username').value=profile.username||(session&&session.username)||'';
+  document.getElementById('displayName').value=profile.displayName||(session&&session.displayName)||'';
+  document.getElementById('email').value=profile.email||(session&&session.email)||'';
+  document.getElementById('bio').value=profile.bio||'';
+  document.getElementById('language').value=settings.language||'en';
+
+  var pfp=document.getElementById('pfp');
+  var old=pfp.querySelector('img'); if(old) old.remove();
+  if(profile.avatar){
+    var img=document.createElement('img'); img.alt=''; img.src=profile.avatar;
+    pfp.insertBefore(img,pfp.firstChild);
+    document.getElementById('pfpInitial').style.display='none';
+  }else{
+    document.getElementById('pfpInitial').style.display='block';
+    document.getElementById('pfpInitial').textContent=(name[0]||'G').toUpperCase();
+  }
+  var banner=document.getElementById('banner');
+  banner.style.backgroundImage=profile.banner?'url("'+profile.banner+'")':'';
+}
+
+/* ============ image uploads ============ */
+function pickImage(inputId,key,maxDim){
+  var input=document.getElementById(inputId);
+  input.onchange=function(e){
+    var f=e.target.files[0]; if(!f) return;
+    if(!/^image\//.test(f.type)){ toast('Please choose an image file.'); return; }
+    if(f.size>4*1024*1024){ toast('Image is too large (4 MB max).'); return; }
+    var fr=new FileReader();
+    fr.onload=function(){
+      var img=new Image();
+      img.onload=function(){
+        var scale=Math.min(1,maxDim/Math.max(img.width,img.height));
+        var cv=document.createElement('canvas');
+        cv.width=Math.round(img.width*scale); cv.height=Math.round(img.height*scale);
+        cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+        try{
+          profile[key]=cv.toDataURL('image/jpeg',0.82);
+          write(PROFILE,profile); paintProfile(); toast(key==='avatar'?'Profile picture updated':'Banner updated');
+        }catch(err){ toast('Could not save that image.'); }
+      };
+      img.onerror=function(){ toast('That image could not be read.'); };
+      img.src=fr.result;
+    };
+    fr.readAsDataURL(f); e.target.value='';
+  };
+  input.click();
+}
+document.getElementById('btnPfp').onclick=function(){ pickImage('fileAvatar','avatar',320); };
+document.getElementById('btnBanner').onclick=function(){ pickImage('fileBanner','banner',1400); };
+
+/* ============ save profile ============ */
+function saveProfile(){
+  var username=clean(document.getElementById('username').value).replace(/\s+/g,'').slice(0,24);
+  var displayName=clean(document.getElementById('displayName').value).slice(0,40);
+  var email=clean(document.getElementById('email').value).toLowerCase();
+  var bio=clean(document.getElementById('bio').value).slice(0,90);
+
+  var ok=setErr('usernameErr',username.length>=2?'':'Username needs at least 2 characters.');
+  ok=setErr('displayNameErr',displayName.length>=2?'':'Display name needs at least 2 characters.')&&ok;
+  ok=setErr('emailErr',(!email||emailRe.test(email))?'':'Enter a valid email address.')&&ok;
+  if(!ok){ toast('Please fix the highlighted fields.'); return; }
+
+  profile.username=username; profile.displayName=displayName; profile.email=email; profile.bio=bio;
+  write(PROFILE,profile);
+  settings.language=document.getElementById('language').value;
+  write(SETTINGS,settings);
+
+  if(session){
+    session.displayName=displayName; session.username=username;
+    if(email) session.email=email;
+    write(SESSION,session);
+    var users=read(USERS,[]);
+    users.forEach(function(u){ if(u.email===session.email||u.username===username){ u.displayName=displayName; u.username=username; } });
+    write(USERS,users);
+  }
+  paintProfile(); toast('Profile saved');
+}
+document.getElementById('btnSaveProfile').onclick=saveProfile;
+document.getElementById('btnSaveTop').onclick=saveProfile;
+
+/* ============ switches ============ */
+function bindSwitch(id,key,onChange){
+  var el=document.getElementById(id);
+  function paint(){ el.classList.toggle('on',!!settings[key]); }
+  paint();
+  el.onclick=function(){
+    settings[key]=!settings[key]; write(SETTINGS,settings); paint();
+    if(onChange) onChange(settings[key]);
+    toast((settings[key]?'Enabled: ':'Disabled: ')+key.replace(/([A-Z])/g,' $1').toLowerCase());
+  };
+}
+bindSwitch('swResponse','notifyResponse');
+bindSwitch('swSound','sound');
+bindSwitch('swUpdates','updates');
+bindSwitch('swBio','biometrics',function(on){
+  if(on&&!window.PublicKeyCredential) toast('This browser does not support biometric unlock.');
+});
+document.getElementById('btnBrowserPerm').onclick=function(){
+  if(!('Notification' in window)){ toast('Notifications are not supported here.'); return; }
+  Notification.requestPermission().then(function(p){
+    toast(p==='granted'?'Browser notifications enabled':'Permission '+p);
+    if(p==='granted') new Notification('NextGPT',{body:'Notifications are now enabled.'});
+  });
+};
+
+/* ============ password ============ */
+document.getElementById('btnPassword').onclick=function(){
+  var p1=document.getElementById('pass1').value,p2=document.getElementById('pass2').value;
+  var ok=setErr('pass1Err',p1.length>=8?'':'Use at least 8 characters.');
+  ok=setErr('pass2Err',p1===p2?'':'Passwords do not match.')&&ok;
+  if(!ok) return;
+  if(!session){ toast('Sign in first to change your password.'); return; }
+  var users=read(USERS,[]),found=false;
+  users.forEach(function(u){ if(u.email===session.email){ u.password=hash(p1); found=true; } });
+  if(!found){ toast('No local account found for this session.'); return; }
+  write(USERS,users);
+  document.getElementById('pass1').value=''; document.getElementById('pass2').value='';
+  toast('Password updated');
+};
+
+/* ============ WebAuthn passkeys ============ */
+var pill=document.getElementById('webauthnPill');
+var webauthnOk=!!(window.PublicKeyCredential&&navigator.credentials&&navigator.credentials.create);
+pill.textContent=webauthnOk?'WebAuthn supported':'WebAuthn unavailable';
+pill.className='pill'+(webauthnOk?' ok':'');
+
+function renderKeys(){
+  var list=read(PASSKEYS,[]),wrap=document.getElementById('keyList');
+  wrap.innerHTML='';
+  if(!list.length){ wrap.innerHTML='<div class="key"><span>🔑</span><span class="t" style="color:var(--muted)">No passkeys yet.</span></div>'; return; }
+  list.forEach(function(k,i){
+    var el=document.createElement('div');
+    el.className='key';
+    el.innerHTML='<span>🔑</span><span class="t">'+esc(k.label)+' · added '+new Date(k.at).toLocaleDateString()+'</span>'+
+      '<button class="btn danger" style="padding:7px 12px">Remove</button>';
+    el.querySelector('button').onclick=function(){
+      var l=read(PASSKEYS,[]); l.splice(i,1); write(PASSKEYS,l); renderKeys(); toast('Passkey removed');
+    };
+    wrap.appendChild(el);
+  });
+}
+
+document.getElementById('btnPasskey').onclick=function(){
+  if(!webauthnOk){ toast('This browser or device does not support passkeys.'); return; }
+  var id=new Uint8Array(16); (window.crypto||{}).getRandomValues&&crypto.getRandomValues(id);
+  var challenge=new Uint8Array(32); (window.crypto||{}).getRandomValues&&crypto.getRandomValues(challenge);
+  var name=(session&&session.email)||profile.username||'nextgpt-user';
+  navigator.credentials.create({publicKey:{
+    challenge:challenge,
+    rp:{name:'NextGPT'},
+    user:{id:id,name:name,displayName:profile.displayName||name},
+    pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+    authenticatorSelection:{userVerification:'preferred',residentKey:'preferred'},
+    timeout:60000,attestation:'none'
+  }}).then(function(cred){
+    var list=read(PASSKEYS,[]);
+    list.push({label:'Passkey on '+(navigator.platform||'this device'),credentialId:cred&&cred.id?String(cred.id).slice(0,24):'local',at:Date.now()});
+    write(PASSKEYS,list); renderKeys(); toast('Passkey added to this device');
+  }).catch(function(err){
+    toast(err&&err.name==='NotAllowedError'?'Passkey creation was cancelled.':'Could not create a passkey here.');
+  });
+};
+
+/* ============ data actions ============ */
+document.getElementById('btnExportAll').onclick=function(){
+  var dump={
+    exportedAt:new Date().toISOString(),
+    theme:localStorage.getItem(THEME),
+    profile:read(PROFILE,{}),settings:read(SETTINGS,{}),
+    chats:read(CHATS,[]),workspace:read(WORKSPACE,[]),
+    passkeys:read(PASSKEYS,[]),session:read(SESSION,null)
+  };
+  var blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='nextgpt-data.json'; a.click(); URL.revokeObjectURL(a.href);
+  toast('Data exported');
+};
+document.getElementById('btnClearChats').onclick=function(){
+  if(!confirm('Delete every conversation stored in this browser?')) return;
+  localStorage.removeItem(CHATS); localStorage.removeItem(ACTIVE); toast('Chat history cleared');
+};
+document.getElementById('btnLogout').onclick=function(){
+  localStorage.removeItem(SESSION); toast('Signed out'); setTimeout(function(){location.href='/auth';},600);
+};
+document.getElementById('btnDelete').onclick=function(){
+  if(!confirm('Delete your local account and all NextGPT data on this device?')) return;
+  var users=read(USERS,[]);
+  if(session) users=users.filter(function(u){return u.email!==session.email;});
+  write(USERS,users);
+  [PROFILE,SETTINGS,SESSION,CHATS,ACTIVE,WORKSPACE,PASSKEYS].forEach(function(k){localStorage.removeItem(k);});
+  toast('Account deleted'); setTimeout(function(){location.href='/';},800);
+};
+
+/* ============ init ============ */
+paintTheme(); paintProfile(); renderKeys();
+</script>
+</body>
+</html>

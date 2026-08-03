@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NextGPT — The Next Generation AI Assistant</title>
+<meta name="description" content="NextGPT is a premium AI assistant for chat, reasoning and code generation, powered by GPT-OSS-20B through OpenRouter." />
+<meta property="og:title" content="NextGPT — The Next Generation AI Assistant" />
+<meta property="og:description" content="Chat, reason and generate production code with NextGPT." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E" />
+<style>
+/* ============ Design tokens ============ */
+:root{
+  --bg:#07080d; --bg-soft:#0b0d15; --surface:rgba(255,255,255,.045);
+  --surface-2:rgba(255,255,255,.075); --border:rgba(255,255,255,.09);
+  --text:#eef1f8; --muted:#98a0b4;
+  --brand:#6d8bff; --brand-2:#8f6dff; --accent:#26d0b0;
+  --grad:linear-gradient(120deg,#6d8bff,#8f6dff 55%,#26d0b0);
+  --grad-soft:linear-gradient(140deg,rgba(109,139,255,.18),rgba(143,109,255,.10));
+  --shadow:0 24px 70px -20px rgba(0,0,0,.75);
+  --shadow-glow:0 18px 50px -14px rgba(109,139,255,.55);
+  --radius:22px; --radius-sm:14px;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+html[data-theme="light"]{
+  --bg:#f6f7fb; --bg-soft:#ffffff; --surface:rgba(12,16,32,.035);
+  --surface-2:rgba(12,16,32,.06); --border:rgba(12,16,32,.10);
+  --text:#101426; --muted:#5b647c;
+  --shadow:0 24px 60px -24px rgba(18,24,45,.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--font);
+  -webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden;
+  transition:background .4s ease,color .4s ease;
+}
+a{color:inherit;text-decoration:none}
+img,canvas{max-width:100%;display:block}
+::selection{background:rgba(109,139,255,.35)}
+.wrap{width:min(1180px,92vw);margin:0 auto}
+
+/* ============ Animated background ============ */
+.bg-layer{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;animation:drift 22s ease-in-out infinite}
+.orb.a{width:52vw;height:52vw;left:-12vw;top:-14vw;background:radial-gradient(circle,#6d8bff,transparent 65%)}
+.orb.b{width:44vw;height:44vw;right:-10vw;top:8vh;background:radial-gradient(circle,#8f6dff,transparent 65%);animation-delay:-6s}
+.orb.c{width:40vw;height:40vw;left:22vw;bottom:-18vw;background:radial-gradient(circle,#26d0b0,transparent 65%);animation-delay:-12s}
+@keyframes drift{0%,100%{transform:translate3d(0,0,0) scale(1)}33%{transform:translate3d(4vw,3vh,0) scale(1.08)}66%{transform:translate3d(-3vw,-2vh,0) scale(.95)}}
+.grid-lines{position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:64px 64px;mask-image:radial-gradient(ellipse at 50% 0%,#000 20%,transparent 75%);opacity:.55}
+#particles{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.75}
+
+/* ============ Nav ============ */
+header.nav{position:sticky;top:0;z-index:60;backdrop-filter:blur(18px);
+  background:color-mix(in srgb,var(--bg) 72%,transparent);border-bottom:1px solid var(--border)}
+.nav-in{display:flex;align-items:center;gap:18px;padding:14px 0}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:1.12rem}
+.logo .mark{width:34px;height:34px;border-radius:11px;background:var(--grad);display:grid;place-items:center;
+  color:#fff;font-size:18px;box-shadow:var(--shadow-glow)}
+.nav-links{display:flex;gap:26px;margin-left:26px;font-size:.94rem;color:var(--muted)}
+.nav-links a{transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--border);background:var(--surface);
+  color:var(--text);display:grid;place-items:center;cursor:pointer;font-size:17px;transition:.22s}
+.icon-btn:hover{background:var(--surface-2);transform:translateY(-1px)}
+.burger{display:none}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid transparent;
+  padding:12px 22px;border-radius:14px;font-weight:650;font-size:.95rem;cursor:pointer;
+  transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s,background .22s,opacity .22s;font-family:inherit}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(0)}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:var(--shadow-glow)}
+.btn-ghost{background:var(--surface);border-color:var(--border);color:var(--text)}
+.btn-ghost:hover{background:var(--surface-2)}
+.btn-lg{padding:15px 28px;font-size:1rem;border-radius:16px}
+
+/* ============ Hero ============ */
+.hero{padding:96px 0 72px;text-align:center;position:relative}
+.pill{display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:999px;
+  border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:.83rem;margin-bottom:26px}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(38,208,176,.18);animation:pulse 2.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 9px rgba(38,208,176,0)}}
+h1.title{font-size:clamp(2.5rem,6.2vw,4.6rem);line-height:1.04;letter-spacing:-.035em;font-weight:800}
+h1.title .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin:22px auto 0;max-width:640px;color:var(--muted);font-size:clamp(1rem,2.2vw,1.16rem)}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:36px}
+.stats{display:flex;gap:34px;justify-content:center;flex-wrap:wrap;margin-top:52px;color:var(--muted);font-size:.9rem}
+.stats b{display:block;color:var(--text);font-size:1.5rem;font-weight:750;letter-spacing:-.02em}
+
+/* glass preview */
+.preview{margin:64px auto 0;border-radius:26px;border:1px solid var(--border);
+  background:linear-gradient(180deg,var(--surface-2),var(--surface));backdrop-filter:blur(22px);
+  box-shadow:var(--shadow);overflow:hidden;text-align:left}
+.preview .bar{display:flex;gap:7px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border)}
+.preview .bar i{width:11px;height:11px;border-radius:50%;background:var(--surface-2)}
+.preview .bar span{margin-left:auto;color:var(--muted);font-size:.78rem}
+.chatdemo{padding:22px;display:grid;gap:14px}
+.bubble{max-width:78%;padding:13px 17px;border-radius:18px;font-size:.94rem;border:1px solid var(--border);animation:rise .6s both}
+.bubble.me{margin-left:auto;background:var(--grad);color:#fff;border:none;border-bottom-right-radius:6px}
+.bubble.ai{background:var(--surface);border-bottom-left-radius:6px}
+.bubble.ai code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface-2);padding:2px 6px;border-radius:6px;font-size:.86em}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+.typing{display:inline-flex;gap:5px;align-items:center}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.3s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+
+/* ============ Sections ============ */
+section{padding:88px 0}
+.eyebrow{color:var(--brand);font-weight:700;font-size:.82rem;letter-spacing:.14em;text-transform:uppercase}
+h2.sec{font-size:clamp(1.8rem,4vw,2.7rem);letter-spacing:-.03em;margin-top:10px;font-weight:780}
+.sec-sub{color:var(--muted);margin-top:12px;max-width:600px}
+.center{text-align:center}.center .sec-sub{margin-inline:auto}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:18px;margin-top:44px}
+.card{padding:26px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);
+  backdrop-filter:blur(14px);transition:transform .3s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s}
+.card:hover{transform:translateY(-6px);border-color:rgba(109,139,255,.45);box-shadow:var(--shadow)}
+.card .ico{width:46px;height:46px;border-radius:14px;background:var(--grad-soft);border:1px solid var(--border);
+  display:grid;place-items:center;font-size:21px;margin-bottom:16px}
+.card h3{font-size:1.08rem;letter-spacing:-.01em;margin-bottom:8px}
+.card p{color:var(--muted);font-size:.94rem}
+
+/* pricing */
+.prices{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:44px}
+.plan{padding:30px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);
+  backdrop-filter:blur(14px);display:flex;flex-direction:column;transition:transform .3s,box-shadow .3s}
+.plan:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.plan.best{border-color:rgba(109,139,255,.5);background:var(--grad-soft);position:relative;box-shadow:var(--shadow-glow)}
+.plan.best .tag{position:absolute;top:-12px;right:22px;background:var(--grad);color:#fff;font-size:.72rem;
+  font-weight:700;padding:5px 12px;border-radius:999px}
+.plan h3{font-size:1.05rem;color:var(--muted);font-weight:650}
+.price{font-size:2.6rem;font-weight:800;letter-spacing:-.04em;margin:10px 0 4px}
+.price span{font-size:.95rem;color:var(--muted);font-weight:500}
+.plan ul{list-style:none;margin:22px 0;display:grid;gap:11px;font-size:.94rem;color:var(--muted)}
+.plan li::before{content:"✓";color:var(--accent);font-weight:800;margin-right:9px}
+.plan .btn{margin-top:auto;width:100%}
+
+/* faq */
+.faq{margin-top:40px;display:grid;gap:12px;max-width:820px;margin-inline:auto}
+details{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);
+  padding:0 20px;transition:border-color .25s,background .25s}
+details[open]{border-color:rgba(109,139,255,.4);background:var(--surface-2)}
+summary{cursor:pointer;list-style:none;padding:18px 0;font-weight:620;display:flex;align-items:center;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";margin-left:auto;color:var(--brand);font-size:1.35rem;line-height:1;transition:transform .3s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{padding:0 0 20px;color:var(--muted);font-size:.95rem}
+
+/* cta band */
+.band{border-radius:28px;border:1px solid var(--border);background:var(--grad-soft);backdrop-filter:blur(16px);
+  padding:56px 32px;text-align:center;box-shadow:var(--shadow)}
+
+/* footer */
+footer{border-top:1px solid var(--border);padding:48px 0 34px;margin-top:60px}
+.f-grid{display:grid;grid-template-columns:1.6fr repeat(3,1fr);gap:32px}
+.f-grid h4{font-size:.86rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:14px}
+.f-grid a,.f-grid p{color:var(--muted);font-size:.93rem;display:block;margin-bottom:9px;transition:color .2s}
+.f-grid a:hover{color:var(--text)}
+.f-bottom{margin-top:36px;padding-top:22px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:12px;
+  justify-content:space-between;color:var(--muted);font-size:.86rem}
+
+/* reveal on scroll */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+@media(max-width:880px){
+  .nav-links{display:none}
+  .burger{display:grid}
+  .nav-links.open{display:grid;position:absolute;top:66px;left:4vw;right:4vw;padding:18px;gap:14px;
+    border:1px solid var(--border);border-radius:18px;background:var(--bg-soft);box-shadow:var(--shadow)}
+  .f-grid{grid-template-columns:1fr 1fr}
+  .hero{padding:64px 0 40px}
+  section{padding:64px 0}
+}
+@media(max-width:520px){.f-grid{grid-template-columns:1fr}.stats{gap:22px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="bg-layer"><div class="orb a"></div><div class="orb b"></div><div class="orb c"></div></div>
+<div class="grid-lines"></div>
+<canvas id="particles"></canvas>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="logo" href="/"><span class="mark">✦</span> NextGPT</a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="/workspace">Workspace</a>
+    </nav>
+    <div class="nav-right">
+      <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+      <button class="icon-btn burger" id="burger" aria-label="Menu">☰</button>
+      <a class="btn btn-ghost" href="/auth" id="loginBtn">Login</a>
+      <a class="btn btn-primary" href="/chat">Start Chat</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <span class="pill"><span class="dot"></span> Powered by GPT-OSS-20B · free tier via OpenRouter</span>
+    <h1 class="title">The <span class="grad">Next Generation</span><br />AI Assistant</h1>
+    <p class="sub">NextGPT thinks, writes and ships with you. Streamed conversations, markdown &amp; syntax highlighting, and a full code workspace for 30+ languages — all in one premium interface.</p>
+    <div class="cta">
+      <a class="btn btn-primary btn-lg" href="/chat">Start Chat →</a>
+      <a class="btn btn-ghost btn-lg" href="/workspace">Open Workspace</a>
+      <a class="btn btn-ghost btn-lg" href="/auth">Create account</a>
+    </div>
+    <div class="stats">
+      <div><b>30+</b> languages</div>
+      <div><b>&lt;1s</b> first token</div>
+      <div><b>100%</b> local history</div>
+      <div><b>0€</b> to start</div>
+    </div>
+
+    <div class="preview reveal">
+      <div class="bar"><i></i><i></i><i></i><span>nextgpt · /chat</span></div>
+      <div class="chatdemo">
+        <div class="bubble me" style="animation-delay:.1s">Refactor this loop into a one-liner and explain why.</div>
+        <div class="bubble ai" style="animation-delay:.35s">Use <code>Array.prototype.reduce</code> — it folds the list in a single pass, so you avoid the mutable accumulator entirely.</div>
+        <div class="bubble ai" style="animation-delay:.6s"><span class="typing"><i></i><i></i><i></i></span></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="features" class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">Features</span>
+      <h2 class="sec">Everything a modern AI product needs</h2>
+      <p class="sec-sub">Built as a single, fast, dependency-light experience — no framework bloat, no tracking, no lock-in.</p>
+    </div>
+    <div class="cards">
+      <div class="card reveal"><div class="ico">⚡</div><h3>Streaming answers</h3><p>Server-sent events deliver tokens the moment they are generated, with a stop button always in reach.</p></div>
+      <div class="card reveal"><div class="ico">🧠</div><h3>Thinking indicator</h3><p>See when the model reasons, then watch the response stream in with a smooth typing animation.</p></div>
+      <div class="card reveal"><div class="ico">💻</div><h3>Code workspace</h3><p>Generate, explain, fix, optimise and convert code across 30+ languages with a fullscreen editor.</p></div>
+      <div class="card reveal"><div class="ico">📝</div><h3>Markdown &amp; highlighting</h3><p>Headings, lists, tables, inline code and fenced blocks — each with a one-click copy button.</p></div>
+      <div class="card reveal"><div class="ico">🗂️</div><h3>Multiple conversations</h3><p>Rename, search, export and import chats. Everything is stored locally in your browser.</p></div>
+      <div class="card reveal"><div class="ico">🔒</div><h3>Key never exposed</h3><p>Requests are proxied through an Express endpoint; your OpenRouter key stays on the server.</p></div>
+      <div class="card reveal"><div class="ico">🎨</div><h3>Dark &amp; light</h3><p>Animated theme switching that remembers your choice on every page of the product.</p></div>
+      <div class="card reveal"><div class="ico">🔑</div><h3>Passkeys ready</h3><p>Optional WebAuthn passkey &amp; biometric unlock from the settings page when your device supports it.</p></div>
+      <div class="card reveal"><div class="ico">📱</div><h3>Truly responsive</h3><p>Desktop, tablet and mobile layouts tuned individually — including a collapsible chat sidebar.</p></div>
+    </div>
+  </section>
+
+  <section id="pricing" class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">Pricing</span>
+      <h2 class="sec">Simple, honest plans</h2>
+      <p class="sec-sub">Start free with the open GPT-OSS-20B model. Upgrade when you need more throughput.</p>
+    </div>
+    <div class="prices">
+      <div class="plan reveal">
+        <h3>Free</h3><div class="price">$0<span>/month</span></div>
+        <ul><li>GPT-OSS-20B (free)</li><li>Unlimited local chats</li><li>Code workspace</li><li>Export &amp; import</li><li>Dark &amp; light themes</li></ul>
+        <a class="btn btn-ghost" href="/chat">Start now</a>
+      </div>
+      <div class="plan best reveal"><span class="tag">Most popular</span>
+        <h3>Pro</h3><div class="price">$12<span>/month</span></div>
+        <ul><li>Priority streaming</li><li>Higher rate limits</li><li>Longer context window</li><li>Workspace presets</li><li>Passkey security</li></ul>
+        <a class="btn btn-primary" href="/auth">Go Pro</a>
+      </div>
+      <div class="plan reveal">
+        <h3>Team</h3><div class="price">$39<span>/month</span></div>
+        <ul><li>5 seats included</li><li>Shared prompt library</li><li>Usage insights</li><li>SSO-ready auth</li><li>Priority support</li></ul>
+        <a class="btn btn-ghost" href="/auth">Contact sales</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2 class="sec">Questions, answered</h2>
+    </div>
+    <div class="faq">
+      <details open><summary>Which model does NextGPT use?</summary><p>The default model is <strong>gpt-oss-20b:free</strong> served through OpenRouter. You can change it with the <code>OPENROUTER_MODEL</code> environment variable without touching any code.</p></details>
+      <details><summary>Where is my data stored?</summary><p>Chats, settings, workspace history and your profile live in your browser's localStorage. Nothing is written to a database and no analytics are collected.</p></details>
+      <details><summary>Is my API key safe?</summary><p>Yes. The browser only ever calls <code>/api/chat</code> on your own server. The key is read from <code>process.env.OPENROUTER_API_KEY</code> and never sent to the client.</p></details>
+      <details><summary>Can I deploy this on Vercel?</summary><p>Yes. Push the repository to GitHub, import it in Vercel, add <code>OPENROUTER_API_KEY</code> as an environment variable and deploy. The included <code>vercel.json</code> handles routing.</p></details>
+      <details><summary>Does it work offline?</summary><p>The interface, your history and the theme work offline. Generating new answers requires a connection to the AI provider.</p></details>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="band reveal">
+      <h2 class="sec">Ready to meet your next assistant?</h2>
+      <p class="sec-sub center" style="margin:12px auto 0">No credit card, no setup, no waiting list.</p>
+      <div class="cta"><a class="btn btn-primary btn-lg" href="/chat">Start chatting free</a><a class="btn btn-ghost btn-lg" href="/workspace">Generate code</a></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="f-grid">
+      <div>
+        <a class="logo" href="/"><span class="mark">✦</span> NextGPT</a>
+        <p style="margin-top:14px;max-width:290px">The Next Generation AI Assistant. Built with plain HTML, CSS and JavaScript on an Express backend.</p>
+      </div>
+      <div><h4>Product</h4><a href="/chat">Chat</a><a href="/workspace">Workspace</a><a href="/settings">Settings</a><a href="#pricing">Pricing</a></div>
+      <div><h4>Resources</h4><a href="#features">Features</a><a href="#faq">FAQ</a><a href="https://openrouter.ai/docs" target="_blank" rel="noopener">OpenRouter docs</a></div>
+      <div><h4>Account</h4><a href="/auth">Login</a><a href="/auth#register">Register</a><a href="/auth#forgot">Forgot password</a></div>
+    </div>
+    <div class="f-bottom"><span>© <span id="year"></span> NextGPT. All rights reserved.</span><span>Powered by OpenRouter · gpt-oss-20b:free</span></div>
+  </div>
+</footer>
+
+<script>
+/* ---------- Theme (shared convention across all pages) ---------- */
+(function(){
+  var KEY='nextgpt:theme';
+  var saved=localStorage.getItem(KEY)||'dark';
+  document.documentElement.setAttribute('data-theme',saved);
+  function paint(){
+    var t=document.documentElement.getAttribute('data-theme');
+    var b=document.getElementById('themeBtn'); if(b) b.textContent = t==='dark'?'🌙':'☀️';
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    paint();
+    var b=document.getElementById('themeBtn');
+    if(b) b.addEventListener('click',function(){
+      var next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+      document.documentElement.setAttribute('data-theme',next);
+      localStorage.setItem(KEY,next); paint();
+    });
+  });
+})();
+
+/* ---------- Year, session, mobile menu ---------- */
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('year').textContent=new Date().getFullYear();
+
+  var burger=document.getElementById('burger'),links=document.getElementById('navLinks');
+  burger.addEventListener('click',function(){links.classList.toggle('open');});
+
+  try{
+    var s=JSON.parse(localStorage.getItem('nextgpt:session')||'null');
+    if(s&&s.email){
+      var l=document.getElementById('loginBtn');
+      l.textContent=(s.displayName||s.username||'Account');
+      l.setAttribute('href','/settings');
+    }
+  }catch(e){}
+
+  /* reveal on scroll */
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);} });
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(function(el,i){el.style.transitionDelay=(i%3)*70+'ms';io.observe(el);});
+});
+
+/* ---------- Floating AI particles ---------- */
+(function(){
+  var c=document.getElementById('particles'),ctx=c.getContext('2d');
+  var dots=[],W=0,H=0,raf;
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size(){
+    W=c.width=window.innerWidth*devicePixelRatio; H=c.height=window.innerHeight*devicePixelRatio;
+    c.style.width=window.innerWidth+'px'; c.style.height=window.innerHeight+'px';
+    var count=Math.min(90,Math.round(window.innerWidth/16));
+    dots=[]; for(var i=0;i<count;i++){
+      dots.push({x:Math.random()*W,y:Math.random()*H,r:(Math.random()*1.7+.6)*devicePixelRatio,
+        vx:(Math.random()-.5)*.22*devicePixelRatio,vy:(Math.random()-.5)*.22*devicePixelRatio,a:Math.random()*.5+.2});
+    }
+  }
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<dots.length;i++){
+      var d=dots[i]; d.x+=d.vx; d.y+=d.vy;
+      if(d.x<0||d.x>W)d.vx*=-1; if(d.y<0||d.y>H)d.vy*=-1;
+      ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,6.2832);
+      ctx.fillStyle='rgba(140,165,255,'+d.a+')'; ctx.fill();
+      for(var j=i+1;j<dots.length;j++){
+        var e=dots[j],dx=d.x-e.x,dy=d.y-e.y,dist=dx*dx+dy*dy,max=(120*devicePixelRatio)*(120*devicePixelRatio);
+        if(dist<max){
+          ctx.strokeStyle='rgba(120,150,255,'+(.10*(1-dist/max))+')';
+          ctx.lineWidth=devicePixelRatio*.6;
+          ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(e.x,e.y);ctx.stroke();
+        }
+      }
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  size(); if(!reduce) tick();
+  window.addEventListener('resize',function(){cancelAnimationFrame(raf);size();if(!reduce)tick();});
+})();
+</script>
+</body>
+</html>
