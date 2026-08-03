@@ -1,22 +1,16 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
-    }
+    { "src": "server.js", "use": "@vercel/node" },
+    { "src": "*.html", "use": "@vercel/static" }
   ],
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/server.js" }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
-      ]
-    }
+  "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/home", "dest": "/index.html" },
+    { "src": "/auth", "dest": "/auth.html" },
+    { "src": "/chat", "dest": "/chat.html" },
+    { "src": "/settings", "dest": "/settings.html" },
+    { "src": "/workspace", "dest": "/workspace.html" },
+    { "src": "/api/(.*)", "dest": "/server.js" }
   ]
 }
